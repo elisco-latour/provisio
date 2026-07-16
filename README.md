@@ -1,0 +1,66 @@
+# provisio
+
+**Compose, test, and audit CLI-driven infrastructure provisioning — over the vendor CLIs you already use.**
+
+`provisio` is a small Python framework for the provisioning *scripts* teams already
+write. It wraps the `az` / `gcloud` / `aws` / `gh` CLIs you already know and gives them
+structure: idempotency, a zero-cloud test harness, a compliance audit log, a generated
+CLI, and a lightweight "did my infra definition change?" gate for CI.
+
+## When *not* to use it
+
+If you need **resource-graph diffing, drift detection, a parallel dependency engine, a
+huge provider ecosystem, or remote state with locking and collaboration**, use
+**Terraform or Pulumi** — that is what they are built for, and `provisio` does not try
+to replace them.
+
+`provisio`'s niche is narrower: it is the tested, idempotent, audited, CLI-generating
+version of the bespoke `bash`/`az` glue that lives in every team's `scripts/` folder. It
+*complements* the big IaC tools — and it is a disciplined home for the `local-exec` /
+`null_resource` / `Command` escape hatch they force you into.
+
+## Install
+
+```bash
+pip install provisio            # core, dependency-free
+pip install "provisio[cli]"     # + the generated Click CLI
+pip install "provisio[rich]"    # + the colourful console reporter
+```
+
+## Hello world
+
+Provisioning one resource, idempotently, needs only the bare core:
+
+```python
+from provisio import step, ensure, Plan, ExecutionContext, CliTool, SubprocessCommandRunner
+
+@step("rg", "Resource group")
+def rg(ctx):
+    az = ctx.tool("az")
+    ensure(ctx, describe="resource group 'demo'",
+           exists=lambda: az.exists("group", "show", "--name", "demo"),
+           create=lambda: az("group", "create", "--name", "demo", "--location", "eastus2"))
+
+ctx = ExecutionContext(tools={"az": CliTool("az", SubprocessCommandRunner())})
+Plan([rg]).execute(ctx)
+```
+
+Run it once and the group is created; run it again and it is skipped.
+
+## What you get
+
+- **No new DSL, engine, or provider model** — it's Python over the CLIs you know.
+- **Idempotency, structured** — the show-then-create pattern in one primitive.
+- **Zero-cloud tests** — a fake runner records commands and returns canned output.
+- **Compliance audit log** — every command + exit code, secrets redacted (even in `--dry-run`).
+- **A generated CLI** — declare your settings once; get `apply` / `diff` with `--dry-run`,
+  `--skip`, `--log-file`, and a Terraform-style state-diff exit code for CI.
+
+## Documentation
+
+Full docs (concepts, the adoption ladder, state/diff, and the API reference) are built
+with Material for MkDocs — see the project documentation site.
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).

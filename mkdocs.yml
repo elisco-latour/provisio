@@ -1,0 +1,50 @@
+site_name: provisio
+site_description: Compose, test, and audit CLI-driven infrastructure provisioning.
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_root_heading: true
+            show_source: false
+            members_order: source
+            docstring_style: google
+            separate_signature: true
+
+nav:
+  - Home: index.md
+  - Concepts: concepts.md
+  - Adoption ladder: adoption-ladder.md
+  - State & audit: state-and-audit.md
+  - Case study: case-study.md
+  - API reference: reference.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      permalink: true

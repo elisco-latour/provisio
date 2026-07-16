@@ -1,0 +1,42 @@
+name: release
+
+# Publishes to PyPI via Trusted Publishing (OIDC) — no API tokens are stored.
+# Before the first release you must configure a PyPI Trusted Publisher for this
+# project: PyPI project 'provisio' -> Publishing -> add the GitHub repo, the
+# workflow filename 'release.yml', and the environment name 'pypi'.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Build sdist + wheel
+        run: uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/provisio
+    permissions:
+      id-token: write # required for PyPI Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
