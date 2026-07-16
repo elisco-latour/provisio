@@ -1,6 +1,6 @@
 [project]
 name = "provisio"
-version = "0.1.2"
+version = "0.2.0"
 description = "Compose, test, and audit CLI-driven infrastructure provisioning — wrap the vendor CLIs you already use."
 readme = "README.md"
 requires-python = ">=3.13"
